@@ -18,6 +18,11 @@ app.get("/", (req, res) => {
     res.send("Bienvenue sur l'API ERP Assistant IA 🚀");
 });
 
+// Enregistrement des routes d'API
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/incidents", require("./routes/incidentRoutes"));
+app.use("/api/ai", require("./routes/aiRoutes"));
+
 // Démarrage du serveur
 const PORT = process.env.PORT || 5000;
 
