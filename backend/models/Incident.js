@@ -1,12 +1,16 @@
 const mongoose = require("mongoose");
 
 const incidentSchema = new mongoose.Schema({
-    title: { type: String, required: true },
+    titre: { type: String, required: true },
     description: { type: String, required: true },
-    module: { type: String, required: true }, // ex: "Oracle AP", "Odoo CRM"
-    technicalDetails: { type: String },
-    status: { type: String, enum: ["nouveau", "en_cours", "resolu"], default: "nouveau" },
+    erp: { type: String, enum: ["Oracle", "Odoo"], required: true },
+    module: { type: String, required: true },
+    erreur: { type: String },
+    priorite: { type: String, enum: ["Faible", "Moyenne", "Haute", "Critique"], default: "Moyenne" },
+    status: { type: String, enum: ["Ouvert", "En cours", "Résolu"], default: "Ouvert" },
     solution: { type: String },
+    infoComplementaires: { type: String },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     createdAt: { type: Date, default: Date.now }
 });

@@ -3,12 +3,16 @@ const Incident = require("../models/Incident");
 // Créer un incident
 exports.createIncident = async (req, res) => {
     try {
-        const { title, description, module, technicalDetails } = req.body;
+        const { titre, description, erp, module, erreur, priorite, infoComplementaires } = req.body;
         const incident = await Incident.create({
-            title,
+            titre,
             description,
+            erp,
             module,
-            technicalDetails
+            erreur,
+            priorite,
+            infoComplementaires,
+            createdBy: req.user ? req.user._id : null
         });
         res.status(201).json(incident);
     } catch (error) {
@@ -19,7 +23,16 @@ exports.createIncident = async (req, res) => {
 // Obtenir tous les incidents
 exports.getIncidents = async (req, res) => {
     try {
-        const incidents = await Incident.find().populate("resolvedBy", "username email");
+        const { erp, module, status, limit } = req.query;
+        const filter = {};
+        if (erp) filter.erp = erp;
+        if (module) filter.module = module;
+        if (status) filter.status = status;
+
+        const incidents = await Incident.find(filter)
+            .sort({ createdAt: -1 })
+            .limit(limit ? parseInt(limit) : 100)
+            .populate("createdBy", "nom prenom email");
         res.json(incidents);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -29,7 +42,9 @@ exports.getIncidents = async (req, res) => {
 // Obtenir un incident par son ID
 exports.getIncidentById = async (req, res) => {
     try {
-        const incident = await Incident.findById(req.params.id).populate("resolvedBy", "username email");
+        const incident = await Incident.findById(req.params.id)
+            .populate("createdBy", "nom prenom email")
+            .populate("resolvedBy", "nom prenom email");
         if (!incident) return res.status(404).json({ message: "Incident non trouvé" });
         res.json(incident);
     } catch (error) {
@@ -37,7 +52,7 @@ exports.getIncidentById = async (req, res) => {
     }
 };
 
-// Mettre à jour un incident (ex: résolution)
+// Mettre à jour un incident
 exports.updateIncident = async (req, res) => {
     try {
         const { status, solution } = req.body;
